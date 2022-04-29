@@ -1,4 +1,4 @@
-const Parser = require('math-expression-evaluator');
+import Parser from 'math-expression-evaluator';
 
 export default function parse(input) {
     try {

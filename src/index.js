@@ -1,5 +1,6 @@
 import { Client, Intents } from 'discord.js' 
 import { TOKEN } from './constants.js';
+import parse from './parser.js';
 
 const client = new Client({ 
 	partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
@@ -38,7 +39,7 @@ client.on('interactionCreate', async (interaction) => {
 	}
 })
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
 	if(!message.author || message.author.bot || message.webhookId) {
 		return;
 	}
@@ -51,8 +52,27 @@ client.on('messageCreate', (message) => {
 	}
 
 	if(guildData.channel && message.channel.id === guildData.channel) {
-		console.log(message.content);
+		const input = message.content;
+		const result = parse(input);
+		const expectedNumber = guildData.counting + 1;
+		if(!result || Math.floor(result) !== expectedNumber) {
+			await message.react('❌')
+			await message.reply(`La cagaste mi pana, el número era \`${expectedNumber}\`. La cuenta se reinicia a 0.`)
+			updateGuildCount(guildId, 0);
+			return;
+		}
+
+		await message.react('✅')
+		updateGuildCount(guildId, Math.floor(result));
 	}
 })
+
+function updateGuildCount(guild, newValue) {
+	const oldValues = guildsData.get(guild);
+	guildsData.set(guild, {
+		channel: oldValues.channel,
+		counting: newValue
+	});
+}
 
 client.login(TOKEN);
