@@ -13,7 +13,10 @@ const commands = [
       .setName('channel')
       .setDescription('the new counting channel')
       .setRequired(true)
-    )
+    ),
+  new SlashCommandBuilder()
+    .setName('supported')
+    .setDescription('List of supported operations')
 ]
   .map(command => command.toJSON());
 
