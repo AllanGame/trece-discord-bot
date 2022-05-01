@@ -50,26 +50,28 @@ client.on('interactionCreate', async (interaction) => {
     const guildData = guildsData.get(guildId);
 
     if(!channel.isText()) {
-      await interaction.reply('Counting can only be set in text channels!')
+      await interaction.reply('El conteo solo puede ser configurado en un canal de texto.');
       return;
     }
 
     guildsData.set(guildId, {
       channel: channel.id,
-      counting: guildData?.counting ?? 0
+      counting: guildData?.counting ?? 0,
+      lastUserId: guildData?.lastUserId ?? null,
+      streak: guildData?.streak ?? 0,
     })
 
-    await interaction.reply(`Now you can count in ${channel.toString()}`);
+    await interaction.reply(`Ahora puedes contar en ${channel.toString()}`);
   }
 
   if(interaction.commandName === 'supported') {
     await interaction.reply(
       `
         \`\`\`
-        +       Addition Operator eg. 2+3 results 5
-        -       Subtraction Operator eg. 2-3 results -1
-        /       Division operator eg 3/2 results 1.5 
-        \\       Multiplication Operator eg. 23 results 6
+        +       Operador de suma ej. 2+3 resulta en 5
+        -       Operador de resta ej. 2-3 resulta en -1
+        /       Operador de divisón ej 3/2 resulta en 1.5 
+        \\       Operador de multiplicación ej. 23 resulta en 6
         Mod     Modulus Operator eg. 3 Mod 2 results 1
         (       Opening Parenthesis
         )       Closing Parenthesis
@@ -108,23 +110,53 @@ client.on('messageCreate', async (message) => {
     const input = message.content;
     const result = parse(input);
     const expectedNumber = guildData.counting + 1;
-    if(!result || Math.floor(result) !== expectedNumber) {
-      await message.react('❌')
-      await message.reply(`La cagaste mi pana, el número era \`${expectedNumber}\`. La cuenta se reinicia a 0.`)
+    const streak = guildData.streak;
+
+    if(message.author.id === guildData.lastUserId) {
+      await message.react('🤔')
+      await message.reply(`No puedes contar dos veces el mismo número. La cuenta se reinicia a 0.`)
       updateGuildCount(guildId, 0);
+      updateGuildLastUserId(guildId, null);
       return;
     }
 
-    await message.react('✅')
+    if(!result || Math.floor(result) !== expectedNumber) {
+      await message.react('❌');
+      await message.reply(`¡El número era ${expectedNumber}! La cuenta se reinicia a 0.`);
+      updateGuildCount(guildId, 0);
+      updateGuildLastUserId(guildId, null);
+      return;
+    }
+
+    await message.react(result > streak ? '☑' : '✅');
+
+    updateGuildStreak(guildId, result)
     updateGuildCount(guildId, Math.floor(result));
+    updateGuildLastUserId(guildId, message.author.id);
   }
 })
 
 function updateGuildCount(guild, newValue) {
   const oldValues = guildsData.get(guild);
   guildsData.set(guild, {
-    channel: oldValues.channel,
+    ...oldValues,
     counting: newValue
+  });
+}
+
+function updateGuildStreak(guild, newValue) {
+  const oldValues = guildsData.get(guild);
+  guildsData.set(guild, {
+    ...oldValues,
+    streak: newValue
+  });
+}
+
+function updateGuildLastUserId(guild, newValue) {
+  const oldValues = guildsData.get(guild);
+  guildsData.set(guild, {
+    ...oldValues,
+    lastUserId: newValue
   });
 }
 
