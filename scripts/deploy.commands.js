@@ -33,7 +33,7 @@ const rest = new REST({ version: '9' }).setToken(TOKEN);
 (async() => {
   if(isProduction) {
     await rest.put(
-      Routes.applicationCommand(APPLICATION_ID),
+      Routes.applicationCommands(APPLICATION_ID),
       { body: commands }
     );
   } else {
