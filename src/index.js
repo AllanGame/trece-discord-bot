@@ -59,6 +59,7 @@ client.on('interactionCreate', async (interaction) => {
       counting: guildData?.counting ?? 0,
       lastUserId: guildData?.lastUserId ?? null,
       streak: guildData?.streak ?? 0,
+      soft: false
     })
 
     await interaction.reply(`Ahora puedes contar en ${channel.toString()}`);
@@ -92,6 +93,24 @@ client.on('interactionCreate', async (interaction) => {
       `
     )
   }
+
+  if(interaction.commandName === 'soft') {
+    const isSoft = interaction.options.getBoolean('set-soft');
+    const guildId = interaction.guildId;
+    const guildData = guildsData.get(guildId);
+
+    guildsData.set(guildId, {
+      ...guildData,
+      soft: isSoft
+    })
+
+    await interaction.reply(`Ahora el conteo está en dificultad ${
+      isSoft ?
+        'soft. Lo que significa que si alguien falla en el conteo, el conteo no se reinicia y solo se ignora.'
+        :
+        'normal. Lo que significa que si alguien falla en el conteo, el conteo se reinicia.'}
+      `);
+  }
 })
 
 client.on('messageCreate', async (message) => {
@@ -111,8 +130,14 @@ client.on('messageCreate', async (message) => {
     const result = parse(input);
     const expectedNumber = guildData.counting + 1;
     const streak = guildData.streak;
+    const isSoftCounting = guildData.soft;
 
     if(message.author.id === guildData.lastUserId) {
+      if(isSoftCounting) {
+        await message.react('961492648902938654');
+        return;
+      }
+
       await message.react('🤔')
       await message.reply(`No puedes contar dos veces el mismo número. La cuenta se reinicia a 0.`)
       updateGuildCount(guildId, 0);
@@ -121,8 +146,13 @@ client.on('messageCreate', async (message) => {
     }
 
     if(!result || Math.floor(result) !== expectedNumber) {
-      await message.react('❌');
-      await message.reply(`¡El número era ${expectedNumber}! La cuenta se reinicia a 0.`);
+      if(isSoftCounting) {
+        await message.react('961492648902938654');
+        return;
+      }
+
+      await message.react(isSoftCounting ? '961492648902938654' : '❌');
+      await message.reply(`¡El número era ${expectedNumber}! La cuenta se reinicia a 0.`)
       updateGuildCount(guildId, 0);
       updateGuildLastUserId(guildId, null);
       return;

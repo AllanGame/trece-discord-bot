@@ -16,7 +16,15 @@ const commands = [
     ),
   new SlashCommandBuilder()
     .setName('supported')
-    .setDescription('List of supported operations')
+    .setDescription('List of supported operations'),
+  new SlashCommandBuilder()
+    .setName('soft')
+    .setDescription('Set the count in soft mode')
+    .addBooleanOption(option => option
+      .setName('set-soft')
+      .setDescription('whether to set the count in soft mode or not')
+      .setRequired(true)
+    ),
 ]
   .map(command => command.toJSON());
 
