@@ -45,6 +45,11 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if (interaction.commandName === 'set') {
+    if(!interaction.member.permissions.has('ADMINISTRATOR')) {
+      interaction.reply('No tienes permisos para usar este comando.');
+      return;
+    }
+
     const channel = interaction.options.getChannel('channel');
     const guildId = interaction.guildId;
     const guildData = guildsData.get(guildId);
@@ -95,6 +100,11 @@ client.on('interactionCreate', async (interaction) => {
   }
 
   if(interaction.commandName === 'soft') {
+    if(!interaction.member.permissions.has('ADMINISTRATOR')) {
+      interaction.reply('No tienes permisos para usar este comando.');
+      return;
+    }
+
     const isSoft = interaction.options.getBoolean('set-soft');
     const guildId = interaction.guildId;
     const guildData = guildsData.get(guildId);
