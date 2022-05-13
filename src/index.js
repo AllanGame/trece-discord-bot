@@ -1,9 +1,12 @@
 import { Client, Intents } from 'discord.js'
+import express from 'express'
+import fs from "fs";
+import path from "path";
+
 import { TOKEN } from './constants.js';
 import parse from './parser.js';
 import {saveData} from "./data.manager.js";
-import fs from "fs";
-import path from "path";
+
 const __dirname = path.resolve(path.dirname(''));
 
 const SAVE_DATA_INTERVAL = 5 * 60 * 1000; // 5 minutes
@@ -176,6 +179,8 @@ client.on('messageCreate', async (message) => {
   }
 })
 
+
+// this is the fucking same function 3 times wtf
 function updateGuildCount(guild, newValue) {
   const oldValues = guildsData.get(guild);
   guildsData.set(guild, {
@@ -200,4 +205,18 @@ function updateGuildLastUserId(guild, newValue) {
   });
 }
 
-client.login(TOKEN);
+const isProduction = process.argv.splice(2).includes('-p');
+// Necessary for Replit
+if(isProduction) {
+  const app = express();
+
+  app.get('/', (_, res) => {
+    res.send('Mamauebo')
+  });
+
+  app.listen(3000, () => {
+    console.log('server started');
+  });
+}
+
+client.login(TOKEN).then();
