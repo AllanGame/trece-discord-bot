@@ -170,7 +170,7 @@ client.on('messageCreate', async (message) => {
 
     await message.react(result > streak ? '☑' : '✅');
 
-    updateGuildStreak(guildId, result)
+    result > streak && updateGuildStreak(guildId, result)
     updateGuildCount(guildId, Math.floor(result));
     updateGuildLastUserId(guildId, message.author.id);
   }
