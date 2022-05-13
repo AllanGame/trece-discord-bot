@@ -39,11 +39,11 @@ export async function processCountingChannelMessage({
     return;
   }
 
-  await message.react(result > streak ? '☑' : '✅');
-
   result > streak && updateGuildStreak(guildId, result)
   updateGuildCount(guildId, Math.floor(result));
   updateGuildLastUserId(guildId, message.author.id);
+
+  await message.react(result > streak ? '☑' : '✅');
 
   // this is the fucking same function 3 times wtf
   function updateGuildCount(guild, newValue) {

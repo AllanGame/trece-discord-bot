@@ -73,14 +73,17 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  (guildData.channel && message.channel.id === guildData.channel) &&
-  await processCountingChannelMessage({
-    message,
-    guildData,
-    guildsData,
-    guildId
-  })
-
+  try {
+    (guildData.channel && message.channel.id === guildData.channel) &&
+    await processCountingChannelMessage({
+      message,
+      guildData,
+      guildsData,
+      guildId
+    })
+  } catch (error) {
+    message.reply('Something went wrong while processing the message. current number (maybe): ' + guildData.counting++);
+  }
 })
 
 const isProduction = process.argv.splice(2).includes('-p');
