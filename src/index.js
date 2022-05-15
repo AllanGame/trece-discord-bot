@@ -8,7 +8,7 @@ import commands from './command.manager.js';
 import {processCountingChannelMessage} from "./message.manager.js";
 
 const __dirname = path.resolve(path.dirname(''));
-const SAVE_DATA_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const SAVE_DATA_INTERVAL = 1 * 60 * 1000; // every minute
 
 const client = new Client({
   partials: ['MESSAGE', 'CHANNEL', 'REACTION'],
